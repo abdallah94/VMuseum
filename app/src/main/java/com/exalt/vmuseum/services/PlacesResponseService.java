@@ -3,7 +3,6 @@ package com.exalt.vmuseum.services;
 
 import com.exalt.vmuseum.Constants;
 import com.exalt.vmuseum.VMuseum;
-import com.exalt.vmuseum.models.Place;
 import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
 import com.exalt.vmuseum.utilities.interfaces.PlacesResponseServiceCallback;
@@ -62,6 +61,7 @@ public class PlacesResponseService {
         call.enqueue(new Callback<PlaceDetails>() {
             @Override
             public void onResponse(Call<PlaceDetails> call, Response<PlaceDetails> response) {
+                response.body().setAudio(response.body().getAudio());
                 callback.onSuccess(response.body());
             }
 

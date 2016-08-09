@@ -2,9 +2,7 @@ package com.exalt.vmuseum.ui.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +14,7 @@ import android.widget.ProgressBar;
 import com.exalt.vmuseum.R;
 import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.services.PlacesResponseService;
+import com.exalt.vmuseum.ui.activities.DisplayActivity;
 import com.exalt.vmuseum.utilities.DividerItemDecoration;
 import com.exalt.vmuseum.utilities.RecyclerTouchListener;
 import com.exalt.vmuseum.utilities.adapters.RecyclerViewAdapter;
@@ -29,8 +28,6 @@ import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
  */
 public class TabFragment extends Fragment implements PlaceDetailsCallback {
     private static DisplayActivityCallback displayActivityCallback;
-    public ViewPager viewPager;
-    private TabLayout tabLayout;
 
     public static TabFragment newInstance(DisplayActivityCallback displayActivityCallback) {
         TabFragment tabFragment = new TabFragment();
@@ -81,6 +78,8 @@ public class TabFragment extends Fragment implements PlaceDetailsCallback {
 
     @Override
     public void onSuccess(PlaceDetails placeDetails) {
+        String m = placeDetails.getAudio();
+        DisplayActivity.mService.startAudio(placeDetails.getAudio());
         displayActivityCallback.changeContainerFragment(DetailsFragment.newInstance(placeDetails, displayActivityCallback));
     }
 

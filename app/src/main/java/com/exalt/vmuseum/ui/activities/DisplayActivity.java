@@ -1,6 +1,11 @@
 package com.exalt.vmuseum.ui.activities;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,6 +24,7 @@ import android.widget.Toast;
 import com.exalt.vmuseum.R;
 import com.exalt.vmuseum.VMuseum;
 import com.exalt.vmuseum.models.PlaceDetails;
+import com.exalt.vmuseum.services.AudioService;
 import com.exalt.vmuseum.services.PlacesResponseService;
 import com.exalt.vmuseum.ui.fragments.TabFragment;
 import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
@@ -30,6 +36,7 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DisplayActivity extends AppCompatActivity implements PlacesResponseServiceCallback, DisplayActivityCallback {
+    public static AudioService mService;
     private static String tag = DisplayActivity.class.getSimpleName();
     private ImageView mprofileImageView;
     private TextView mnameTextView;
@@ -39,12 +46,27 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private Toolbar mToolbar;
     private int mCurrentTab = 0;
     private TabFragment mTabFragment;
+    private ServiceConnection mConnection = new ServiceConnection() {
+        // Called when the connection with the service is established
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            AudioService.LocalBinder binder = (AudioService.LocalBinder) service;
+            mService = binder.getService();
+        }
+
+        // Called when the connection with the service disconnects unexpectedly
+        public void onServiceDisconnected(ComponentName className) {
+            Log.e(tag, "onServiceDisconnected");
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
         initViews();
+        Intent intent = new Intent(this, AudioService.class);//start the audio service
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         PlacesResponseService.getPlaces(this);//get the list of places to display in viewPager
 
     }

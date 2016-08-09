@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.exalt.vmuseum.Constants;
 import com.exalt.vmuseum.R;
 import com.exalt.vmuseum.models.PlaceDetails;
+import com.exalt.vmuseum.services.AudioService;
 import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
 import com.squareup.picasso.Picasso;
 
@@ -19,10 +20,13 @@ import com.squareup.picasso.Picasso;
  * Created by Abdallah on 8/2/2016.
  */
 public class DetailsFragment extends Fragment {
+    private static DisplayActivityCallback displayActivityCallback;
     private ImageView mImageView;
     private TextView mNameTextView;
     private TextView mSummayTextView;
-    private static DisplayActivityCallback displayActivityCallback;
+    private String tag = this.getClass().getSimpleName();
+    private AudioService mService;
+    private PlaceDetails mPlaceDetails;
 
     public static DetailsFragment newInstance(PlaceDetails placeDetails, DisplayActivityCallback displayActivityCallback) {
         DetailsFragment detailsFragment = new DetailsFragment();
@@ -36,13 +40,14 @@ public class DetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.details_fragment_layout, container, false);
-        PlaceDetails placeDetails = (PlaceDetails) getArguments().getSerializable(Constants.PLACE_DETAILS);
+        mPlaceDetails = (PlaceDetails) getArguments().getSerializable(Constants.PLACE_DETAILS);
         initViews(view, container);
-        displayActivityCallback.setToolbarTitle(placeDetails.getName());
-        Picasso.with(getContext()).load(placeDetails.getImage()).resize(300, 300).into(mImageView);
-        mNameTextView.setText(placeDetails.getName() + ", " + placeDetails.getOrigin());
-        mSummayTextView.setText(placeDetails.getSummary());
+        displayActivityCallback.setToolbarTitle(mPlaceDetails.getName());
+        Picasso.with(getContext()).load(mPlaceDetails.getImage()).resize(300, 300).into(mImageView);
+        mNameTextView.setText(mPlaceDetails.getName() + ", " + mPlaceDetails.getOrigin());
+        mSummayTextView.setText(mPlaceDetails.getSummary());
         return view;
 
     }
