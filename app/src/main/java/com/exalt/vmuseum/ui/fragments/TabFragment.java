@@ -67,7 +67,7 @@ public class TabFragment extends Fragment implements PlaceDetailsCallback {
             @Override
             public void onClick(View view, int position) {
                 //display Details
-                PlacesResponseService.getPlaceDetails(position, placeDetailsCallback);
+                PlacesResponseService.getPlaceDetails(position + 1, placeDetailsCallback);
 
             }
 
