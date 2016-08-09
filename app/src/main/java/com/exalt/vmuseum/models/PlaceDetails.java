@@ -20,6 +20,9 @@ public class PlaceDetails implements Serializable {
     @SerializedName("image")
     @Expose
     private String image;
+    @SerializedName("audio")
+    @Expose
+    private String audio;
     @SerializedName("origin")
     @Expose
     private String origin;
@@ -81,6 +84,14 @@ public class PlaceDetails implements Serializable {
      */
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getAudio() {
+        return audio;
+    }
+
+    public void setAudio(String audio) {
+        this.audio = audio;
     }
 
     /**

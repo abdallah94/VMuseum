@@ -27,7 +27,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class DisplayActivity extends AppCompatActivity implements PlacesResponseServiceCallback, DisplayActivityCallback {
+    private static String tag = DisplayActivity.class.getSimpleName();
     private ImageView mprofileImageView;
     private TextView mnameTextView;
     private FragmentManager mFragmentManager;
@@ -36,7 +39,6 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private Toolbar mToolbar;
     private int mCurrentTab = 0;
     private TabFragment mTabFragment;
-    private static String tag = DisplayActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +53,12 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
         View headerLayout = navigationView.getHeaderView(0);
-        mprofileImageView = (ImageView) headerLayout.findViewById(R.id.imageViewProfile);
+        mprofileImageView = (CircleImageView) headerLayout.findViewById(R.id.imageViewProfile);
         mnameTextView = (TextView) headerLayout.findViewById(R.id.nameView);
-        ImageView imageView = (ImageView) findViewById(R.id.header_background);
+        ImageView imageView = (ImageView) headerLayout.findViewById(R.id.header_background);
         //mnameTextView.setText(Profile.getCurrentProfile().getName());    set Name
         Picasso.with(this).load(R.drawable.no_image).resize(100, 100).into(mprofileImageView);      //set picture
-        Picasso.with(this).load(R.drawable.no_image).resize(250, 250).into(imageView);
+        Picasso.with(this).load(R.drawable.background).resize(250, 250).into(imageView);
         setupDrawerContent(navigationView);//add listener for the menu items
         mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.app_name,

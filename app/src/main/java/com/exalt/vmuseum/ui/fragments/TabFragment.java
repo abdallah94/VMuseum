@@ -5,16 +5,21 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.exalt.vmuseum.R;
-import com.exalt.vmuseum.VMuseum;
 import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.services.PlacesResponseService;
-import com.exalt.vmuseum.utilities.adapters.MyAdapter;
+import com.exalt.vmuseum.utilities.DividerItemDecoration;
+import com.exalt.vmuseum.utilities.RecyclerTouchListener;
+import com.exalt.vmuseum.utilities.adapters.RecyclerViewAdapter;
+import com.exalt.vmuseum.utilities.interfaces.ClickListener;
 import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
 import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
 
@@ -23,9 +28,9 @@ import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
  * Created by Abdallah on 7/24/2016.
  */
 public class TabFragment extends Fragment implements PlaceDetailsCallback {
-    private TabLayout tabLayout;
-    public ViewPager viewPager;
     private static DisplayActivityCallback displayActivityCallback;
+    public ViewPager viewPager;
+    private TabLayout tabLayout;
 
     public static TabFragment newInstance(DisplayActivityCallback displayActivityCallback) {
         TabFragment tabFragment = new TabFragment();
@@ -42,31 +47,35 @@ public class TabFragment extends Fragment implements PlaceDetailsCallback {
          *Inflate tab_layout and setup Views.
          */
         View x = inflater.inflate(R.layout.tab_layout, null);
-        tabLayout = (TabLayout) x.findViewById(R.id.tabs);
-        viewPager = (ViewPager) x.findViewById(R.id.viewpager);
-        viewPager.setAdapter(new MyAdapter(getChildFragmentManager()));
-        tabLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                tabLayout.setupWithViewPager(viewPager);
-            }
-        });
-        setViewPagerListener(viewPager);
-
+        RecyclerView recyclerView = (RecyclerView) x.findViewById(R.id.places_recycler_view);
+        setRecyclerView(recyclerView, container);
         return x;
     }
 
-    private void setViewPagerListener(final ViewPager viewPager) {
-        final PlaceDetailsCallback callback = this;
-
-        viewPager.setOnClickListener(new View.OnClickListener() {
+    private void setRecyclerView(RecyclerView recyclerView, ViewGroup container) {
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(getContext());
+        recyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(container.getContext().getApplicationContext(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(container.getContext(), LinearLayoutManager.VERTICAL));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(adapter);
+        ProgressBar progressBar = (ProgressBar) getActivity().findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
+        final PlaceDetailsCallback placeDetailsCallback = this;
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(container.getContext().getApplicationContext(), recyclerView, new ClickListener() {
             @Override
-            public void onClick(View view) {
-                int currentTab = viewPager.getCurrentItem();
-                int id = VMuseum.placesList.get(currentTab).getId();
-                PlacesResponseService.getPlaceDetails(id, callback);
+            public void onClick(View view, int position) {
+                //display Details
+                PlacesResponseService.getPlaceDetails(position, placeDetailsCallback);
+
             }
-        });
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
 
     }
 
