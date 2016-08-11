@@ -9,8 +9,8 @@ import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -42,11 +42,10 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private ImageView mprofileImageView;
     private TextView mnameTextView;
     private FragmentManager mFragmentManager;
-    private FragmentTransaction mFragmentTransaction;
     private DrawerLayout mDrawerLayout;
     private Toolbar mToolbar;
     private ProgressBar mProgressBar;
-    private RecylerViewFragment mRecyclerViewFragment;
+    private SwipeRefreshLayout mswipeRefreshLayout;
 
     //for communicating with the service
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -77,6 +76,7 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private void initViews() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mswipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh_layout);
         NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
         View headerLayout = navigationView.getHeaderView(0);
         mprofileImageView = (CircleImageView) headerLayout.findViewById(R.id.imageViewProfile);
@@ -91,22 +91,35 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
                 R.string.app_name);
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
+        setSwipeRefresh();//set listener for swipe refresh layout
+
+    }
+
+    private void setSwipeRefresh() {
+        final PlacesResponseServiceCallback placesResponseServiceCallback = this;
+        mswipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                PlacesResponseService.getPlaces(placesResponseServiceCallback);//get the list of places to display in viewPager
+            }
+        });
+        mswipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_light, R.color.colorAccent, R.color.colorPrimaryDark);
 
     }
 
     @Override
     public void onFailure(Object error) {
-        Log.v(tag, "Couldn't load data", (Throwable) error);
+        Log.v(tag, "Couldn't load places list data", (Throwable) error);
         Toast.makeText(this, "Couldn't load data ", Toast.LENGTH_LONG).show();
-        Log.v(tag, "places list loading data", (Throwable) error);
         mProgressBar.setVisibility(View.GONE);
+        mswipeRefreshLayout.setRefreshing(false);
     }
 
     //successfully retrieved the list of places from the server
     @Override
     public void onSuccess(List<PlaceDetails> placeList) {
+        mswipeRefreshLayout.setRefreshing(false);
         VMuseum.placesList = placeList;
-        mRecyclerViewFragment = RecylerViewFragment.newInstance(this);
         changeContainerFragment(RecylerViewFragment.newInstance(this));
     }
 
