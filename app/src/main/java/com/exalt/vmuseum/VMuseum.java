@@ -2,9 +2,8 @@ package com.exalt.vmuseum;
 
 import android.app.Application;
 
-import com.exalt.vmuseum.models.Place;
 import com.exalt.vmuseum.models.PlaceDetails;
-import com.squareup.picasso.Picasso;
+import com.gimbal.android.Gimbal;
 
 import java.util.List;
 
@@ -18,6 +17,7 @@ public class VMuseum extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Gimbal.setApiKey(this, "1b250cd9-8d49-41ed-960e-92c7a20fa9ae");
         userID = 1;
     }
 }

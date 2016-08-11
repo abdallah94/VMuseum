@@ -26,12 +26,12 @@ import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
 /**
  * Created by Abdallah on 7/24/2016.
  */
-public class TabFragment extends Fragment implements PlaceDetailsCallback {
+public class RecylerViewFragment extends Fragment implements PlaceDetailsCallback {
     private static DisplayActivityCallback displayActivityCallback;
 
-    public static TabFragment newInstance(DisplayActivityCallback displayActivityCallback) {
-        TabFragment tabFragment = new TabFragment();
-        TabFragment.displayActivityCallback = displayActivityCallback;
+    public static RecylerViewFragment newInstance(DisplayActivityCallback displayActivityCallback) {
+        RecylerViewFragment tabFragment = new RecylerViewFragment();
+        RecylerViewFragment.displayActivityCallback = displayActivityCallback;
         return tabFragment;
 
     }
@@ -76,9 +76,9 @@ public class TabFragment extends Fragment implements PlaceDetailsCallback {
 
     }
 
+    //successfully retrieved the place details for the given place from the server
     @Override
     public void onSuccess(PlaceDetails placeDetails) {
-        String m = placeDetails.getAudio();
         DisplayActivity.mService.startAudio(placeDetails.getAudio());
         displayActivityCallback.changeContainerFragment(DetailsFragment.newInstance(placeDetails, displayActivityCallback));
     }

@@ -22,6 +22,10 @@
         <activity android:name=".ui.activities.DisplayActivity"></activity>
 
         <service android:name=".services.AudioService"></service>
+
+        <receiver android:name=".services.AudioService$CancelNotoficationListener" />
+        <receiver android:name=".services.AudioService$PauseButtonListener" />
+        <receiver android:name=".services.AudioService$PlayButtonListener" />
     </application>
 
 </manifest>

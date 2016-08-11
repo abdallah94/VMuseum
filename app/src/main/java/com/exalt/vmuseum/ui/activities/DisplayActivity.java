@@ -26,7 +26,7 @@ import com.exalt.vmuseum.VMuseum;
 import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.services.AudioService;
 import com.exalt.vmuseum.services.PlacesResponseService;
-import com.exalt.vmuseum.ui.fragments.TabFragment;
+import com.exalt.vmuseum.ui.fragments.RecylerViewFragment;
 import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
 import com.exalt.vmuseum.utilities.interfaces.PlacesResponseServiceCallback;
 import com.squareup.picasso.Picasso;
@@ -44,8 +44,9 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private FragmentTransaction mFragmentTransaction;
     private DrawerLayout mDrawerLayout;
     private Toolbar mToolbar;
-    private int mCurrentTab = 0;
-    private TabFragment mTabFragment;
+    private RecylerViewFragment mRecyclerViewFragment;
+
+    //for communicating with the service
     private ServiceConnection mConnection = new ServiceConnection() {
         // Called when the connection with the service is established
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -97,43 +98,50 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
 
     }
 
+    //successfully retrieved the list of places from the server
     @Override
     public void onSuccess(List<PlaceDetails> placeList) {
         VMuseum.placesList = placeList;
-        mTabFragment = TabFragment.newInstance(this);
-        mFragmentManager = getSupportFragmentManager();
-        mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView, mTabFragment).addToBackStack(null).commit();
+        mRecyclerViewFragment = RecylerViewFragment.newInstance(this);
+        changeContainerFragment(RecylerViewFragment.newInstance(this));
     }
 
 
+    //set the listener for the drawer's menu
     private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         selectDrawerItem(menuItem);
+                        //Checking if the item is in checked state or not, if not make it in checked state
+                        if (menuItem.isChecked()) menuItem.setChecked(false);
+                        else menuItem.setChecked(true);
+
+                        //Closing drawer on item click
+                        mDrawerLayout.closeDrawers();
                         return true;
                     }
                 });
     }
 
+    //decide the action for each option
     public void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         switch (menuItem.getItemId()) {
             case R.id.nav_home_fragment:
-                changeContainerFragment(TabFragment.newInstance(this));//reload the viewPager
+                changeContainerFragment(RecylerViewFragment.newInstance(this));//reload the viewPager
                 break;
         }
         // Close the navigation drawer
     }
 
 
+    //change the fragment in the container frame layout
     @Override
     public void changeContainerFragment(Fragment fragment) {
         mFragmentManager = getSupportFragmentManager();
-        mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView, fragment).addToBackStack(null).commit();
+        mFragmentManager.beginTransaction().replace(R.id.containerView, fragment).addToBackStack(null).commit();
 
     }
 

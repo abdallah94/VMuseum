@@ -61,7 +61,6 @@ public class PlacesResponseService {
         call.enqueue(new Callback<PlaceDetails>() {
             @Override
             public void onResponse(Call<PlaceDetails> call, Response<PlaceDetails> response) {
-                response.body().setAudio(response.body().getAudio());
                 callback.onSuccess(response.body());
             }
 
