@@ -142,6 +142,7 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     public void onSuccess(List<PlaceDetails> placeList) {
         mswipeRefreshLayout.setRefreshing(false);
         VMuseum.placesList = placeList;
+        setToolbarTitle("VMuseum");
         changeContainerFragment(RecylerViewFragment.newInstance(this));
     }
 
@@ -182,6 +183,12 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         mFragmentManager = getSupportFragmentManager();
         mFragmentManager.beginTransaction().replace(R.id.containerView, fragment).addToBackStack(null).commit();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        setToolbarTitle("VMuseum");
     }
 
     @Override
