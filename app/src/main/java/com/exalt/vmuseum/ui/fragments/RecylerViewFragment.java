@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.exalt.vmuseum.R;
+import com.exalt.vmuseum.VMuseum;
 import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.services.PlacesResponseService;
 import com.exalt.vmuseum.ui.activities.DisplayActivity;
@@ -64,7 +65,7 @@ public class RecylerViewFragment extends Fragment implements PlaceDetailsCallbac
             @Override
             public void onClick(View view, int position) {
                 //display Details
-                PlacesResponseService.getPlaceDetails(position + 1, placeDetailsCallback);
+                PlacesResponseService.getPlaceDetails(VMuseum.placesList.get(position).getId(), placeDetailsCallback);
 
             }
 

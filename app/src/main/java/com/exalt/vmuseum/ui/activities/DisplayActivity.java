@@ -15,12 +15,15 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.exalt.vmuseum.R;
 import com.exalt.vmuseum.VMuseum;
@@ -46,6 +49,8 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private Toolbar mToolbar;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mswipeRefreshLayout;
+    private ToggleButton mToggleButton;
+    private NavigationView mNavigationView;
 
     //for communicating with the service
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -54,6 +59,8 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
             VMuseumService.LocalBinder binder = (VMuseumService.LocalBinder) service;
             mService = binder.getService();
             mService.setBeaconListeners();
+            setToggleListener(mNavigationView);//set listeners for automatic detection
+            mToggleButton.setChecked(true);
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -77,15 +84,15 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mswipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh_layout);
-        NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
-        View headerLayout = navigationView.getHeaderView(0);
+        mNavigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
+        View headerLayout = mNavigationView.getHeaderView(0);
         mprofileImageView = (CircleImageView) headerLayout.findViewById(R.id.imageViewProfile);
         mnameTextView = (TextView) headerLayout.findViewById(R.id.nameView);
         ImageView imageView = (ImageView) headerLayout.findViewById(R.id.header_background);
         //mnameTextView.setText(Profile.getCurrentProfile().getName());    set Name
         Picasso.with(this).load(R.drawable.no_image).resize(100, 100).into(mprofileImageView);      //set picture
         Picasso.with(this).load(R.drawable.background).resize(250, 250).into(imageView);
-        setupDrawerContent(navigationView);//add listener for the menu items
+        setupDrawerContent(mNavigationView);//add listener for the menu items
         mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.app_name,
                 R.string.app_name);
@@ -93,6 +100,21 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         drawerToggle.syncState();
         setSwipeRefresh();//set listener for swipe refresh layout
 
+    }
+
+    private void setToggleListener(NavigationView navigationView) {
+        Menu menu = navigationView.getMenu();
+        mToggleButton = (ToggleButton) menu.findItem(R.id.automatic_detection).getActionView().findViewById(R.id.switch_automatic_beacons);
+        mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    mService.setBeaconListeners();
+                } else {
+                    mService.removeBeaconListeners();
+                }
+            }
+        });
     }
 
     private void setSwipeRefresh() {

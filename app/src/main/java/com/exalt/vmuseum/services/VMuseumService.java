@@ -128,19 +128,21 @@ public class VMuseumService extends Service implements MediaPlayer.OnPreparedLis
     }
 
     public void startAudio(String url) {
-        this.url = url;
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
+        if (url != null) {
+            this.url = url;
+            if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
+                mMediaPlayer = null;
+            }
+            try {
+                prepareMediaPlayer();
+                mMediaPlayer.setDataSource(url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mMediaPlayer.prepareAsync(); // prepare async to not block main thread
         }
-        try {
-            prepareMediaPlayer();
-            mMediaPlayer.setDataSource(url);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mMediaPlayer.prepareAsync(); // prepare async to not block main thread
     }
 
     @Override
@@ -260,7 +262,9 @@ public class VMuseumService extends Service implements MediaPlayer.OnPreparedLis
     @Override
     public void onSuccess(PlaceDetails placeDetails) {
         DisplayActivity.mService.startAudio(placeDetails.getAudio());
-        displayActivityCallback.changeContainerFragment(DetailsFragment.newInstance(placeDetails, displayActivityCallback));
+        if (displayActivityCallback != null) {
+            displayActivityCallback.changeContainerFragment(DetailsFragment.newInstance(placeDetails, displayActivityCallback));
+        }
 
     }
 
