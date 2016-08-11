@@ -18,14 +18,15 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.exalt.vmuseum.R;
 import com.exalt.vmuseum.VMuseum;
 import com.exalt.vmuseum.models.PlaceDetails;
-import com.exalt.vmuseum.services.AudioService;
 import com.exalt.vmuseum.services.PlacesResponseService;
+import com.exalt.vmuseum.services.VMuseumService;
 import com.exalt.vmuseum.ui.fragments.RecylerViewFragment;
 import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
 import com.exalt.vmuseum.utilities.interfaces.PlacesResponseServiceCallback;
@@ -36,7 +37,7 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DisplayActivity extends AppCompatActivity implements PlacesResponseServiceCallback, DisplayActivityCallback {
-    public static AudioService mService;
+    public static VMuseumService mService;
     private static String tag = DisplayActivity.class.getSimpleName();
     private ImageView mprofileImageView;
     private TextView mnameTextView;
@@ -44,14 +45,16 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
     private FragmentTransaction mFragmentTransaction;
     private DrawerLayout mDrawerLayout;
     private Toolbar mToolbar;
+    private ProgressBar mProgressBar;
     private RecylerViewFragment mRecyclerViewFragment;
 
     //for communicating with the service
     private ServiceConnection mConnection = new ServiceConnection() {
         // Called when the connection with the service is established
         public void onServiceConnected(ComponentName className, IBinder service) {
-            AudioService.LocalBinder binder = (AudioService.LocalBinder) service;
+            VMuseumService.LocalBinder binder = (VMuseumService.LocalBinder) service;
             mService = binder.getService();
+            mService.setBeaconListeners();
         }
 
         // Called when the connection with the service disconnects unexpectedly
@@ -60,13 +63,12 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
         initViews();
-        Intent intent = new Intent(this, AudioService.class);//start the audio service
+        Intent intent = new Intent(this, VMuseumService.class);//start the audio service
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         PlacesResponseService.getPlaces(this);//get the list of places to display in viewPager
 
@@ -74,6 +76,7 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
 
     private void initViews() {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         NavigationView navigationView = (NavigationView) mDrawerLayout.findViewById(R.id.navigation_view);
         View headerLayout = navigationView.getHeaderView(0);
         mprofileImageView = (CircleImageView) headerLayout.findViewById(R.id.imageViewProfile);
@@ -88,6 +91,7 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
                 R.string.app_name);
         mDrawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
+
     }
 
     @Override
@@ -95,7 +99,7 @@ public class DisplayActivity extends AppCompatActivity implements PlacesResponse
         Log.v(tag, "Couldn't load data", (Throwable) error);
         Toast.makeText(this, "Couldn't load data ", Toast.LENGTH_LONG).show();
         Log.v(tag, "places list loading data", (Throwable) error);
-
+        mProgressBar.setVisibility(View.GONE);
     }
 
     //successfully retrieved the list of places from the server

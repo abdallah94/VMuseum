@@ -16,8 +16,11 @@ import android.os.IBinder;
 import android.os.PowerManager;
 
 import com.exalt.vmuseum.R;
+import com.exalt.vmuseum.models.PlaceDetails;
 import com.exalt.vmuseum.ui.activities.DisplayActivity;
-import com.exalt.vmuseum.utilities.interfaces.BeaconDetectionCallback;
+import com.exalt.vmuseum.ui.fragments.DetailsFragment;
+import com.exalt.vmuseum.utilities.interfaces.DisplayActivityCallback;
+import com.exalt.vmuseum.utilities.interfaces.PlaceDetailsCallback;
 import com.gimbal.android.BeaconEventListener;
 import com.gimbal.android.BeaconManager;
 import com.gimbal.android.BeaconSighting;
@@ -25,15 +28,18 @@ import com.gimbal.android.CommunicationManager;
 
 import java.io.IOException;
 
-public class AudioService extends Service implements MediaPlayer.OnPreparedListener,
-        AudioManager.OnAudioFocusChangeListener {
+public class VMuseumService extends Service implements MediaPlayer.OnPreparedListener,
+        AudioManager.OnAudioFocusChangeListener, PlaceDetailsCallback {
     private static MediaPlayer mMediaPlayer = null;
+    private static BeaconEventListener mBeaconEventListener;
+    private static BeaconManager mBeaconManager;
+    private static DisplayActivityCallback displayActivityCallback;
     private final IBinder mBinder = new LocalBinder();
     private String url;
     private WifiManager.WifiLock mWifiLock;
 
 
-    public AudioService() {
+    public VMuseumService() {
     }
 
     public static void pauseAudio() {
@@ -55,27 +61,28 @@ public class AudioService extends Service implements MediaPlayer.OnPreparedListe
         }
     }
 
-    public static void setBeaconListeners(final BeaconDetectionCallback callback) {
-        BeaconEventListener beaconEventListener = new BeaconEventListener() {
+    public void setBeaconListeners() {
+        mBeaconEventListener = new BeaconEventListener() {
             @Override
             public void onBeaconSighting(BeaconSighting beaconSighting) {
                 super.onBeaconSighting(beaconSighting);
-                sendBeaconDetails(beaconSighting, callback);
+                sendBeaconDetails(beaconSighting);
             }
         };
-        BeaconManager beaconManager = new BeaconManager();
-        beaconManager.addListener(beaconEventListener);
-        beaconManager.startListening();
+        mBeaconManager = new BeaconManager();
+        mBeaconManager.addListener(mBeaconEventListener);
+        mBeaconManager.startListening();
         CommunicationManager.getInstance().startReceivingCommunications();
 
     }
 
-    private static void sendBeaconDetails(BeaconSighting beaconSighting, BeaconDetectionCallback callback) {
+    public void removeBeaconListeners() {
+        mBeaconManager.stopListening();
+    }
 
-
-        String BeaconName = beaconSighting.getBeacon().getIdentifier();
-        callback.beaconFound(BeaconName);
-
+    private void sendBeaconDetails(BeaconSighting beaconSighting) {
+        String beaconName = beaconSighting.getBeacon().getIdentifier();
+        PlacesResponseService.getPlaceDetails(Integer.parseInt(beaconName), this);
     }
 
     @Override
@@ -250,6 +257,18 @@ public class AudioService extends Service implements MediaPlayer.OnPreparedListe
         return pauseAction;
     }
 
+    @Override
+    public void onSuccess(PlaceDetails placeDetails) {
+        DisplayActivity.mService.startAudio(placeDetails.getAudio());
+        displayActivityCallback.changeContainerFragment(DetailsFragment.newInstance(placeDetails, displayActivityCallback));
+
+    }
+
+    @Override
+    public void onFailure(Object error) {
+
+    }
+
     public static class CancelNotoficationListener extends BroadcastReceiver {
 
         public CancelNotoficationListener() {
@@ -283,9 +302,9 @@ public class AudioService extends Service implements MediaPlayer.OnPreparedListe
     }
 
     public class LocalBinder extends Binder {
-        public AudioService getService() {
+        public VMuseumService getService() {
             // Return this instance of LocalService so clients can call public methods
-            return AudioService.this;
+            return VMuseumService.this;
         }
     }
 

@@ -21,11 +21,11 @@
         </activity>
         <activity android:name=".ui.activities.DisplayActivity"></activity>
 
-        <service android:name=".services.AudioService"></service>
+        <service android:name=".services.VMuseumService"></service>
 
-        <receiver android:name=".services.AudioService$CancelNotoficationListener" />
-        <receiver android:name=".services.AudioService$PauseButtonListener" />
-        <receiver android:name=".services.AudioService$PlayButtonListener" />
+        <receiver android:name=".services.VMuseumService$CancelNotoficationListener" />
+        <receiver android:name=".services.VMuseumService$PauseButtonListener" />
+        <receiver android:name=".services.VMuseumService$PlayButtonListener" />
     </application>
 
 </manifest>
